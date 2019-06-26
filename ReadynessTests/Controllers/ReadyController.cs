@@ -26,7 +26,8 @@ namespace ReadynessTests.Controllers
         [HttpGet]
         public async Task<ActionResult<string>> Get()
         {
-            _logger.LogInformation($"{new string('-', 10)} receiving request /api/ready");
+            var guid = Guid.NewGuid();
+            _logger.LogWarning($"{new string('-', 4)} {guid} - receiving request /api/ready at {DateTimeOffset.UtcNow}");
 
             if (DateTimeOffset.UtcNow - _dt > _interval)
             {
@@ -38,18 +39,19 @@ namespace ReadynessTests.Controllers
             var url = $"{request.Scheme}//{request.Host}{request.Path}{request.QueryString}";
             var headers = string.Join("][", request.Headers.Select(x => $"{x.Key}:{x.Value}").ToArray());
 
-            var msg = $"{new string('-', 10)} I am {(_isReady ? "ready" : "not ready")} - {DateTimeOffset.UtcNow - _dt} - {url} - headers: {headers}";
-
-            _logger.LogWarning(msg);
-
             if (_isReady)
             {
-                return msg;
+                var msg1 = $"{new string('-', 4)} {guid} - I am {(_isReady ? "ready" : "not ready")} at {DateTimeOffset.UtcNow} - {DateTimeOffset.UtcNow - _dt} - {url} - headers: {headers}";
+
+                _logger.LogWarning(msg1);
+                return msg1;
             }
 
             await Task.Delay(30);
 
-            return msg;
+            var msg2 = $"{new string('-', 4)} {guid} - I am {(_isReady ? "ready" : "not ready")} at {DateTimeOffset.UtcNow} - {DateTimeOffset.UtcNow - _dt} - {url} - headers: {headers}";
+            _logger.LogWarning(msg2);
+            return msg2;
         }
     }
 }
