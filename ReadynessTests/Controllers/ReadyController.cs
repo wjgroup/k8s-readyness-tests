@@ -14,7 +14,7 @@ namespace ReadynessTests.Controllers
     {
         private static DateTimeOffset _dt = DateTimeOffset.UtcNow;
         private static bool _isReady = true;
-        private static TimeSpan _interval = new TimeSpan(0, 0, 30);
+        private static TimeSpan _interval = new TimeSpan(0, 0, 45);
         private readonly ILogger<ReadyController> _logger;
 
         public ReadyController(ILogger<ReadyController> logger)
@@ -39,7 +39,13 @@ namespace ReadynessTests.Controllers
             var msg = $"{new string('-', 10)} I am {(_isReady ? "ready" : "not ready")} - {DateTimeOffset.UtcNow - _dt} - {url} - headers: {headers}";
 
             _logger.LogWarning(msg);
-            return msg;
+
+            if (_isReady)
+            {
+                return msg;
+            }
+
+            throw new Exception(msg);
         }
     }
 }
