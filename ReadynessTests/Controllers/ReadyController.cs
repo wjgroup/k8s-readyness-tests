@@ -24,8 +24,10 @@ namespace ReadynessTests.Controllers
 
         // GET api/ready
         [HttpGet]
-        public ActionResult<string> Get()
+        public async Task<ActionResult<string>> Get()
         {
+            _logger.LogInformation($"{new string('-', 10)} receiving request /api/ready");
+
             if (DateTimeOffset.UtcNow - _dt > _interval)
             {
                 _isReady = !_isReady;
@@ -45,7 +47,9 @@ namespace ReadynessTests.Controllers
                 return msg;
             }
 
-            throw new Exception(msg);
+            await Task.Delay(30);
+
+            return msg;
         }
     }
 }
