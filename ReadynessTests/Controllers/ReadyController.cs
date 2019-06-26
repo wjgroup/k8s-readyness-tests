@@ -13,7 +13,6 @@ namespace ReadynessTests.Controllers
     public class ReadyController : ControllerBase
     {
         private static DateTimeOffset _startDT = DateTimeOffset.UtcNow;
-        private static bool _isReady = true;
         private static TimeSpan _interval = new TimeSpan(0, 0, 45);
         private readonly ILogger<ReadyController> _logger;
 
@@ -26,33 +25,26 @@ namespace ReadynessTests.Controllers
         [HttpGet]
         public async Task<ActionResult<string>> Get()
         {
-            if (((DateTimeOffset.UtcNow - _startDT).Seconds / _interval.Seconds) % 2 == 0)
-            {
-                _isReady = true;
-            }
-            else
-            {
-                _isReady = false;
-            }
-
+            var totalSec = (int)(DateTimeOffset.UtcNow - _startDT).TotalSeconds;
+            var ready = (totalSec / (int)_interval.TotalSeconds) % 2 == 0;
             var guid = Guid.NewGuid();
 
-            _logger.LogWarning($"{new string('-', 4)} {guid} - receiving request /api/ready at {DateTimeOffset.UtcNow}");
+            _logger.LogWarning($"[start] receiving request /api/ready at {DateTimeOffset.UtcNow} - {totalSec}sec");
 
             var request = HttpContext.Request;
             var url = $"{request.Scheme}//{request.Host}{request.Path}{request.QueryString}";
             var headers = string.Join("][", request.Headers.Select(x => $"{x.Key}:{x.Value}").ToArray());
 
-            if (_isReady)
+            if (ready)
             {
-                var msg1 = $"{new string('-', 4)} {guid} - [{(_isReady ? "ready" : "NOT ready")}] at {DateTimeOffset.UtcNow} - {DateTimeOffset.UtcNow - _startDT} - {url} - headers: {headers}";
+                var msg1 = $"[ready] at {DateTimeOffset.UtcNow} - {totalSec}sec - {url} - headers: {headers}";
                 _logger.LogWarning(msg1);
                 return msg1;
             }
 
-            await Task.Delay(30000);
+            await Task.Delay(20000);
 
-            var msg2 = $"{new string('-', 4)} {guid} - [{(_isReady ? "ready" : "NOT ready")}] at {DateTimeOffset.UtcNow} - {DateTimeOffset.UtcNow - _startDT} - {url} - headers: {headers}";
+            var msg2 = $"[NOT ready] at {DateTimeOffset.UtcNow} - {totalSec}sec - {url} - headers: {headers}";
             _logger.LogWarning(msg2);
             return msg2;
         }
