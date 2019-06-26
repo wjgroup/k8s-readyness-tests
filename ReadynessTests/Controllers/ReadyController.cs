@@ -12,7 +12,7 @@ namespace ReadynessTests.Controllers
     [ApiController]
     public class ReadyController : ControllerBase
     {
-        private static DateTimeOffset _dt = DateTimeOffset.UtcNow;
+        private static DateTimeOffset _startDT = DateTimeOffset.UtcNow;
         private static bool _isReady = true;
         private static TimeSpan _interval = new TimeSpan(0, 0, 45);
         private readonly ILogger<ReadyController> _logger;
@@ -26,14 +26,18 @@ namespace ReadynessTests.Controllers
         [HttpGet]
         public async Task<ActionResult<string>> Get()
         {
-            var guid = Guid.NewGuid();
-            _logger.LogWarning($"{new string('-', 4)} {guid} - receiving request /api/ready at {DateTimeOffset.UtcNow}");
-
-            if (DateTimeOffset.UtcNow - _dt > _interval)
+            if (((DateTimeOffset.UtcNow - _startDT).Seconds / _interval.Seconds) % 2 == 0)
             {
-                _isReady = !_isReady;
-                _dt = DateTimeOffset.UtcNow;
+                _isReady = true;
             }
+            else
+            {
+                _isReady = false;
+            }
+
+            var guid = Guid.NewGuid();
+
+            _logger.LogWarning($"{new string('-', 4)} {guid} - receiving request /api/ready at {DateTimeOffset.UtcNow}");
 
             var request = HttpContext.Request;
             var url = $"{request.Scheme}//{request.Host}{request.Path}{request.QueryString}";
@@ -41,15 +45,14 @@ namespace ReadynessTests.Controllers
 
             if (_isReady)
             {
-                var msg1 = $"{new string('-', 4)} {guid} - I am {(_isReady ? "ready" : "not ready")} at {DateTimeOffset.UtcNow} - {DateTimeOffset.UtcNow - _dt} - {url} - headers: {headers}";
-
+                var msg1 = $"{new string('-', 4)} {guid} - [{(_isReady ? "ready" : "NOT ready")}] at {DateTimeOffset.UtcNow} - {DateTimeOffset.UtcNow - _startDT} - {url} - headers: {headers}";
                 _logger.LogWarning(msg1);
                 return msg1;
             }
 
             await Task.Delay(30000);
 
-            var msg2 = $"{new string('-', 4)} {guid} - I am {(_isReady ? "ready" : "not ready")} at {DateTimeOffset.UtcNow} - {DateTimeOffset.UtcNow - _dt} - {url} - headers: {headers}";
+            var msg2 = $"{new string('-', 4)} {guid} - [{(_isReady ? "ready" : "NOT ready")}] at {DateTimeOffset.UtcNow} - {DateTimeOffset.UtcNow - _startDT} - {url} - headers: {headers}";
             _logger.LogWarning(msg2);
             return msg2;
         }
