@@ -47,7 +47,7 @@ namespace ReadynessTests.Controllers
                 return msg1;
             }
 
-            await Task.Delay(30);
+            await Task.Delay(30000);
 
             var msg2 = $"{new string('-', 4)} {guid} - I am {(_isReady ? "ready" : "not ready")} at {DateTimeOffset.UtcNow} - {DateTimeOffset.UtcNow - _dt} - {url} - headers: {headers}";
             _logger.LogWarning(msg2);
