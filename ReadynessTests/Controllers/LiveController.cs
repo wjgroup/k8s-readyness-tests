@@ -11,11 +11,20 @@ namespace ReadynessTests.Controllers
     [ApiController]
     public class LiveController : ControllerBase
     {
+        private static DateTimeOffset _startDT = DateTimeOffset.UtcNow;
+        private static readonly int _interval = 30;
+
         // GET api/live
         [HttpGet]
-        public ActionResult<string> Get()
+        public async Task<ActionResult<string>> Get()
         {
-            return "live";
+            if (DateTimeOffset.UtcNow > _startDT.AddSeconds(_interval))
+            {
+                await Task.Delay(10000);
+                return "not live";
+            }
+
+            return $"live {DateTimeOffset.UtcNow - _startDT}";
         }
     }
 }
